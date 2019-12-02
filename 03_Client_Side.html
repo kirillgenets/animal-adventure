@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="./assets/css/style.css">
+    <title>Animal Adventure</title>
+  </head>
+  <body>
+    <div class="animal-adventure">
+      <div class="screen-start hidden">
+        <div class="panel">
+          <img class="logo" src="./assets/img/logo.png" alt="logo">
+          <h3 class="rules-title">
+            Правила игры:
+          </h3>
+          <ol class="rules-list">
+            <li>Управляйте персонажом используя клавиши со стрелками;</li>
+            <li>Таймер отображает время в игре;</li>
+            <li>Во время движения собирайте фрукты и овощи;</li>
+            <li>Каждый собранный фрукт или овощ увеличивает счетчик очков на 1 балл;</li>
+            <li>Вы можете остановить игру нажав на кнопку паузы или пробел;</li>
+            <li>Избегайте камней иначе игра будет окончена;</li>
+            <li>Цель игры — собрать наибольшее количество очков;</li>
+          </ol>
+          <p class="good-luck">
+            Удачи!
+          </p>
+          <button class="start-button">Начать игру</button>
+        </div>
+      </div>
+      <div class="screen-game">
+        <div class="playground">
+        </div>
+        <img class="logo" src="./assets/img/logo.png" alt="logo">
+        <div class="panel-score panel-fruits">
+          <p class="panel-score-description">Очки:</p>
+          <p class="panel-score-value fruits-value">0</p>
+        </div>
+        <div class="panel-score panel-timer">
+          <p class="panel-score-description">Время:</p>
+          <p class="panel-score-value timer-value">00:00</p>
+        </div>
+        <div class="toggler sound-toggler"></div>
+        <div class="toggler pause-toggler"></div>
+      </div>
+    </div>
+    <script src="./assets/js/main.js"></script>
+  </body>
+</html>

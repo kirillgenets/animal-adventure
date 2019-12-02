@@ -1,0 +1,176 @@
+body {
+  margin: 0;
+
+  font-family: Calibri, sans-serif;
+  font-weight: bold;
+}
+
+.animal-adventure {
+  width: 1024px;
+  height: 768px;
+  margin: 0 auto;
+}
+
+.screen-start {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  width: 1024px;
+  height: 768px;
+
+  background: url(../img/bg-start-page.png);
+}
+
+.screen-start .panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  width: 515px;
+  padding-bottom: 33px;
+  border-radius: 13px;
+
+  background-color: rgba(255, 255, 255, 0.8);
+}
+
+.panel .logo {
+  width: 166px;
+  height: 117px;
+}
+
+.rules-title {
+  margin-top: 4px;
+  margin-bottom: 20px;
+}
+
+.rules-list {
+  width: 405px;
+  margin: 0;
+}
+
+.start-button {
+  width: 159px;
+  padding: 10px 0;
+  border: none;
+  border-radius: 13px;
+
+  background-color: rgb(46, 106, 3);
+
+  font-family: Calibri, sans-serif;
+  font-size: 18px;
+  font-weight: bold;
+  color: #fff;
+
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.start-button:hover {
+  opacity: 0.7;  
+}
+
+.start-button:active, .start-button:focus {
+  opacity: 0.5;
+}
+
+.screen-game {
+  width: 1024px;
+  height: 768px;
+
+  position: relative;
+
+  background-image: url(../img/leaves.png), url(../img/bg-game.jpg);
+  background-size: 100%;
+  background-repeat: no-repeat;
+}
+
+.screen-game .logo {
+  width: 223px;
+  height: 157px;
+ 
+  position: absolute;
+  left: 50%;
+  top: -10px;
+
+  transform: translateX(-50%);
+}
+
+.panel-score {
+  box-sizing: border-box;
+  width: 188px;
+  height: 138px;
+  padding-top: 16px;
+
+  position: absolute;
+  top: 0;
+
+  background-color: #2e7304;
+  color: #fff
+}
+
+.panel-fruits {
+  padding-left: 23px;
+}
+
+.panel-timer {
+  padding-right: 23px;
+
+  right: 0;
+
+  text-align: right;
+}
+
+.panel-score-description {
+  margin: 0;
+
+  font-size: 36px;
+}
+
+.panel-score-value {
+  margin: 0;
+
+  font-size: 60px;
+}
+
+.toggler {
+  width: 71px;
+  height: 71px;
+  border-radius: 10px;
+
+  position: absolute;
+  left: 27px;
+
+  background-color: rgb(255, 255, 255);
+  background-position: center;
+  background-repeat: no-repeat;
+
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.toggler:hover {
+  opacity: 0.7;
+}
+
+.toggler:active {
+  opacity: 0.5;
+}
+
+.sound-toggler {
+  top: 182px;
+
+  background-image: url(../img/sound-off-icon.png);
+  background-size: 80%;
+}
+
+.pause-toggler {
+  top: 271px;
+
+  background-image: url(../img/pause-icon.png);
+  background-size: 40%;
+}
+
+.hidden {
+  display: none;
+}
