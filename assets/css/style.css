@@ -171,6 +171,29 @@ body {
   background-size: 40%;
 }
 
+.playground {
+  width: 750px;
+  height: 768px;
+  
+  position: absolute;
+  left: 50%;
+  bottom: 0px;
+
+  transform: translateX(-50%);
+}
+
+.character {
+  width: 48.666667px;
+  height: 49.25px;
+
+  position: absolute;
+  left: 487px;
+  bottom: 10px;
+
+  background-image: url(../img/character.png);
+  background-position: 0 -147.75px;
+}
+
 .hidden {
   display: none;
 }
