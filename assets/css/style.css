@@ -9,6 +9,8 @@ body {
   width: 1024px;
   height: 768px;
   margin: 0 auto;
+
+  overflow: hidden;
 }
 
 .screen-start {
@@ -90,10 +92,8 @@ body {
   height: 157px;
  
   position: absolute;
-  left: 50%;
-  top: -10px;
-
-  transform: translateX(-50%);
+  left: -10px;
+  bottom: -10px;
 }
 
 .panel-score {
@@ -172,7 +172,7 @@ body {
 }
 
 .playground {
-  width: 750px;
+  width: 650px;
   height: 768px;
   
   position: absolute;
@@ -192,6 +192,10 @@ body {
 
   background-image: url(../img/character.png);
   background-position: 0 -147.75px;
+}
+
+.object {
+  position: absolute;
 }
 
 .hidden {
