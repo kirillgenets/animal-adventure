@@ -9,8 +9,28 @@
   </head>
   <body>
     <div class="animal-adventure">
+        <div class="panel panel-over hidden">
+          <img class="logo" src="./assets/img/logo.png" alt="logo">
+          <h3 class="game-over">
+            Игра окончена!
+          </h3>
+          <p class="playing-time">
+            Время игры:
+          </p>
+          <p class="playing-time-value">
+            00:00
+          </p>
+          <p class="game-score">
+            Количество набранных очков:
+          </p>
+          <p class="game-score-value">
+            0
+          </p>
+          <button class="button play-again-button">Новая игра</button>
+        </div>
+      <div class="toggler sound-toggler"></div>
       <div class="screen-start">
-        <div class="panel">
+        <div class="panel panel-start">
           <img class="logo" src="./assets/img/logo.png" alt="logo">
           <h3 class="rules-title">
             Правила игры:
@@ -27,7 +47,7 @@
           <p class="good-luck">
             Удачи!
           </p>
-          <button class="start-button">Начать игру</button>
+          <button class="button start-button">Начать игру</button>
         </div>
       </div>
       <div class="screen-game hidden">
@@ -42,7 +62,6 @@
           <p class="panel-score-description">Время:</p>
           <p class="panel-score-value timer-value">00:00</p>
         </div>
-        <div class="toggler sound-toggler"></div>
         <div class="toggler pause-toggler"></div>
       </div>
     </div>

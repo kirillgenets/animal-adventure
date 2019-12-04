@@ -6,22 +6,26 @@ const MAX_FRUITS_COUNT_X = 5,
   MAX_STONES_DISTANCE_Y = 200,
   FRUITS_COUNT_Y = 7,
   STONES_COUNT_Y = 5,
-  BACKGROUND_SPEED = 0.5;
+  BACKGROUND_SPEED = 0.5,
+  MEETING_GAP = 15;
 
 const screenStart = document.querySelector('.screen-start'),
   screenGame = document.querySelector('.screen-game'),
   playground = screenGame.querySelector('.playground'),
   startButton = screenStart.querySelector('.start-button'),
   defaultIndicators = screenGame.querySelectorAll('.panel-score'),
-  soundToggler = screenGame.querySelector('.sound-toggler'),
-  pauseToggler = screenGame.querySelector('.pause-toggler');
-
-startButton.addEventListener('click', onStartButtonClick);
+  soundToggler = document.querySelector('.sound-toggler'),
+  pauseToggler = screenGame.querySelector('.pause-toggler'),
+  gameOverPanel = document.querySelector('.panel-over'),
+  scoreValueElement = gameOverPanel.querySelector('.game-score-value'),
+  timeValueElement = gameOverPanel.querySelector('.playing-time-value'),
+  playAgainButton = gameOverPanel.querySelector('.play-again-button');
 
 // Данные
 const settings = {
   isStarted: false,
-  speed: 1,
+  isOver: false,
+  speed: 2,
   startTime: '',
   pauseTime: '',
   backgroundPosition: 0,
@@ -125,6 +129,8 @@ let stonesData = [];
 let indicatorsData = {};
 
 document.addEventListener('click', onDocumentClick);
+startButton.addEventListener('click', onStartButtonClick);
+soundToggler.addEventListener('click', onSoundTogglerClick);
 
 // Обработчики событий
 function onDocumentClick() {
@@ -135,6 +141,12 @@ function onStartButtonClick() {
   screenStart.classList.add('hidden');
   screenGame.classList.remove('hidden');
 
+  initGame();
+}
+
+function onPlayAgainButtonClick() {
+  gameOverPanel.classList.add('hidden');
+  
   initGame();
 }
 
@@ -154,19 +166,58 @@ function onPauseTogglerClick() {
 
 // Функции
 function initGame() {
+  settings.isOver = false;
   settings.isStarted = true;
   settings.startTime = Date.now();
 
-  soundToggler.addEventListener('click', onSoundTogglerClick);
   pauseToggler.addEventListener('click', onPauseTogglerClick);
   document.addEventListener('keydown', onPauseKeyDown);
+  startButton.removeEventListener('click', onStartButtonClick);
+  playAgainButton.removeEventListener('click', onPlayAgainButtonClick);
 
   backgroundAudio.play();
 
   requestAnimationFrame(moveBackground);
+
+  clearAllData();
+  clearAllObjects();
   
   createAllData();
   renderAllObjects();
+}
+
+function clearAllData() {
+  characterData = {};
+  fruitsData = [];
+  stonesData = [];
+  indicatorsData = {};
+}
+
+function clearAllObjects() {
+  [...document.querySelectorAll('.object')].forEach(object => { object.remove(); });
+}
+
+function overGame() {
+  settings.isStarted = false;
+  settings.isOver = true;
+
+  stopAudio(backgroundAudio);
+  stopAudio(countAudio);
+
+  finishAudio.play();
+
+  gameOverPanel.classList.remove('hidden');
+  
+  showResults();
+
+  playAgainButton.addEventListener('click', onPlayAgainButtonClick);
+  pauseToggler.removeEventListener('click', onPauseTogglerClick);
+  document.removeEventListener('keydown', onPauseKeyDown);
+}
+
+function showResults() {
+  timeValueElement.textContent = indicatorsData.timer.value;
+  scoreValueElement.textContent = indicatorsData.fruits.value;
 }
 
 function createAllData() {
@@ -193,6 +244,11 @@ function toggleSoundActivity() {
   finishAudio.volume = settings.isSoundActive ? 1 : 0;
 }
 
+function stopAudio(audio) {
+  audio.pause();
+  audio.currentTime = 0.0;
+}
+
 function pauseGame() {
   pauseToggler.classList.toggle('inactive');
 
@@ -211,13 +267,15 @@ function moveBackground() {
     if (characterData.directions.forward) {
       settings.backgroundPosition += BACKGROUND_SPEED;
     } else if (characterData.directions.back) {
-      settings.backgroundPosition += BACKGROUND_SPEED;
+      settings.backgroundPosition -= BACKGROUND_SPEED;
     }    
   }
 
   screenGame.style.backgroundPosition = `0 ${settings.backgroundPosition}px`;
 
-  requestAnimationFrame(moveBackground);
+  if (!settings.isOver) {
+    requestAnimationFrame(moveBackground);
+  }  
 }
 
 function createCharacterData() {
@@ -241,7 +299,13 @@ function renderCharacter() {
       changeCharacterPosition();
     }
 
-    requestAnimationFrame(moveCharacter);
+    if (settings.isOver) {
+      characterInstance.unrender();
+    }
+
+    if (!settings.isOver) {
+      requestAnimationFrame(moveCharacter);
+    }      
   }
 
   function changeCharacterPosition() {
@@ -326,10 +390,10 @@ function renderCharacter() {
 }
 
 function isMeetingWithCharacter(objectData) {
-  return (characterData.posX <= objectData.posX + objectData.width && 
-          characterData.posX + characterData.width >= objectData.posX &&
-          characterData.posY <= objectData.posY + objectData.height &&
-          characterData.posY + characterData.height >= objectData.posY);
+  return (characterData.posX + MEETING_GAP <= objectData.posX + objectData.width && 
+          characterData.posX - MEETING_GAP + characterData.width >= objectData.posX &&
+          characterData.posY + MEETING_GAP <= objectData.posY + objectData.height &&
+          characterData.posY - MEETING_GAP + characterData.height >= objectData.posY);
 }
 
 
@@ -366,7 +430,9 @@ function renderFruit(fruitData, index) {
       loopFruit();     
     }
 
-    requestAnimationFrame(moveFruit);    
+    if (!settings.isOver) {
+      requestAnimationFrame(moveFruit);
+    }    
   }
 
   function changeFruitPosition() {
@@ -423,10 +489,13 @@ function renderStone(stoneData) {
   function moveStone() {
     if (settings.isStarted && stoneInstance) {
       changeStonePosition();
-      loopStone();     
+      loopStone();
+      checkStoneForMeeting();
     }
 
-    requestAnimationFrame(moveStone);    
+    if (!settings.isOver) {
+      requestAnimationFrame(moveStone);
+    }        
   }
 
   function changeStonePosition() {
@@ -438,6 +507,12 @@ function renderStone(stoneData) {
     if (stoneData.posY > playground.clientHeight) {
       stoneData.posY = -stoneData.height;
       stoneData.posX = getRandomObjectPosition(stoneData.width);
+    }
+  }
+
+  function checkStoneForMeeting() {
+    if (isMeetingWithCharacter(stoneData)) {
+      overGame();
     }
   }
 }
@@ -452,6 +527,7 @@ function getRandomObjectPosition(width) {
 }
 
 function createIndicatorsData() {
+  indicatorsDefaultData.fruits.value = 0;
   indicatorsData = Object.assign({}, indicatorsDefaultData);
 }
 
@@ -477,7 +553,9 @@ function renderIndicators() {
         indicatorInstance.change(indicatorData.value);
       }
 
-      requestAnimationFrame(changeFruitsValue);
+      if (!settings.isOver) {
+        requestAnimationFrame(changeFruitsValue);
+      }
     }
 
     function changeTimerValue() {
@@ -499,7 +577,9 @@ function renderIndicators() {
         indicatorInstance.change(indicatorData.value);
       }
 
-      requestAnimationFrame(changeTimerValue);
+      if (!settings.isOver) {
+        requestAnimationFrame(changeTimerValue);
+      }     
     }
   });
 }
@@ -549,8 +629,10 @@ class Character {
   }
 
   _animate() {
-    this._backgroundPosX += this._width;
-    this._element.style.backgroundPosition = `${this._backgroundPosX}px ${this._backgroundPosY}px`;
+    if (this._element) {
+      this._backgroundPosX += this._width;
+      this._element.style.backgroundPosition = `${this._backgroundPosX}px ${this._backgroundPosY}px`;
+    }    
   }
 
   set directions(value) {
@@ -571,11 +653,13 @@ class Character {
   }
 
   move(newPosX, newPosY) {
-    this._element.style.left = `${newPosX}px`;
-    this._element.style.top = `${newPosY}px`;
-    this._changeDirection();
+    if (this._element) {
+      this._element.style.left = `${newPosX}px`;
+      this._element.style.top = `${newPosY}px`;
+      this._changeDirection();
 
-    requestAnimationFrame(this._animate);
+      requestAnimationFrame(this._animate);
+    }    
   }
 }
 

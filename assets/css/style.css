@@ -10,21 +10,21 @@ body {
   height: 768px;
   margin: 0 auto;
 
+  position: relative;
+
   overflow: hidden;
 }
 
 .screen-start {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
   width: 1024px;
   height: 768px;
+
+  position: relative;
 
   background: url(../img/bg-start-page.png);
 }
 
-.screen-start .panel {
+.panel {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -33,7 +33,14 @@ body {
   padding-bottom: 33px;
   border-radius: 13px;
 
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 3;
+
   background-color: rgba(255, 255, 255, 0.8);
+
+  transform: translate(-50%, -50%);
 }
 
 .panel .logo {
@@ -51,7 +58,7 @@ body {
   margin: 0;
 }
 
-.start-button {
+.button {
   width: 159px;
   padding: 10px 0;
   border: none;
@@ -68,12 +75,33 @@ body {
   transition: 0.3s;
 }
 
-.start-button:hover {
+.button:hover {
   opacity: 0.7;  
 }
 
-.start-button:active, .start-button:focus {
+.button:active, .button:focus {
   opacity: 0.5;
+}
+
+.game-over {
+  margin-top: 0;
+  margin-bottom: 13px;
+
+  font-size: 24px;
+}
+
+.playing-time, .game-score {
+  margin-top: 0;
+  margin-bottom: 10px;
+
+  font-size: 19px;
+}
+
+.playing-time-value, .game-score-value {
+  margin-top: 0;
+  margin-bottom: 16px;
+
+  font-size: 30px;
 }
 
 .screen-game {
