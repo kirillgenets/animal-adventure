@@ -82,7 +82,22 @@ body {
 
   position: relative;
 
-  background-image: url(../img/leaves.png), url(../img/bg-game.jpg);
+  background-image: url(../img/bg-game.jpg);
+  background-size: 100%;
+}
+
+.screen-game::before {
+  content: '';
+
+  width: 1024px;
+  height: 546px;
+
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 1;
+
+  background-image: url(../img/leaves.png);
   background-size: 100%;
   background-repeat: no-repeat;
 }
@@ -104,6 +119,7 @@ body {
 
   position: absolute;
   top: 0;
+  z-index: 2;
 
   background-color: #2e7304;
   color: #fff
@@ -140,6 +156,7 @@ body {
 
   position: absolute;
   left: 27px;
+  z-index: 2;
 
   background-color: rgb(255, 255, 255);
   background-position: center;

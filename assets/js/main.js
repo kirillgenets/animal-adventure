@@ -20,7 +20,8 @@ const settings = {
   isStarted: false,
   speed: 1,
   startTime: '',
-  pauseTime: ''
+  pauseTime: '',
+  backgroundPosition: 0
 }
 
 const characterDefaultData = {
@@ -119,6 +120,8 @@ function onStartButtonClick() {
 function initGame() {
   settings.isStarted = true;
   settings.startTime = Date.now();
+
+  requestAnimationFrame(moveBackground);
   
   createAllData();
   renderAllObjects();
@@ -136,6 +139,20 @@ function renderAllObjects() {
   renderAllFruits();
   renderAllStones();
   renderIndicators();
+}
+
+function moveBackground() {
+  if (settings.isStarted && characterData.isMoving) {
+    if (characterData.directions.forward) {
+      settings.backgroundPosition += settings.speed;
+    } else if (characterData.directions.back) {
+      settings.backgroundPosition += settings.speed;
+    }    
+  }
+
+  screenGame.style.backgroundPosition = `0 ${settings.backgroundPosition}px`;
+
+  requestAnimationFrame(moveBackground);
 }
 
 function createCharacterData() {
