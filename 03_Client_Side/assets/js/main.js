@@ -13,6 +13,7 @@ const screenStart = document.querySelector('.screen-start'),
   screenGame = document.querySelector('.screen-game'),
   playground = screenGame.querySelector('.playground'),
   startButton = screenStart.querySelector('.start-button'),
+  rulesList = screenStart.querySelector('.rules-list'),
   defaultIndicators = screenGame.querySelectorAll('.panel-score'),
   soundToggler = document.querySelector('.sound-toggler'),
   pauseToggler = screenGame.querySelector('.pause-toggler'),
@@ -131,6 +132,9 @@ let indicatorsData = {};
 document.addEventListener('click', onDocumentClick);
 startButton.addEventListener('click', onStartButtonClick);
 soundToggler.addEventListener('click', onSoundTogglerClick);
+
+// Анимация показа правил игры
+rulesList.style.animation = 'show 2s';
 
 // Обработчики событий
 function onDocumentClick() {
