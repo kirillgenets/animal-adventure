@@ -181,11 +181,20 @@ body {
   background-size: 80%;
 }
 
+.sound-toggler.inactive {
+  background-image: url(../img/sound-on-icon.png);
+  background-size: 60%;
+}
+
 .pause-toggler {
   top: 271px;
 
   background-image: url(../img/pause-icon.png);
   background-size: 40%;
+}
+
+.pause-toggler.inactive {
+  background-image: url(../img/play-icon.png);
 }
 
 .playground {

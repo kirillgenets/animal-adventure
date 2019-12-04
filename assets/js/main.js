@@ -5,13 +5,15 @@ const MAX_FRUITS_COUNT_X = 5,
   MAX_FRUITS_DISTANCE_Y = 150,
   MAX_STONES_DISTANCE_Y = 200,
   FRUITS_COUNT_Y = 7,
-  STONES_COUNT_Y = 5;
+  STONES_COUNT_Y = 5,
+  BACKGROUND_SPEED = 0.5;
 
 const screenStart = document.querySelector('.screen-start'),
   screenGame = document.querySelector('.screen-game'),
   playground = screenGame.querySelector('.playground'),
   startButton = screenStart.querySelector('.start-button'),
-  defaultIndicators = screenGame.querySelectorAll('.panel-score');
+  defaultIndicators = screenGame.querySelectorAll('.panel-score'),
+  soundToggler = screenGame.querySelector('.sound-toggler');
 
 startButton.addEventListener('click', onStartButtonClick);
 
@@ -21,7 +23,8 @@ const settings = {
   speed: 1,
   startTime: '',
   pauseTime: '',
-  backgroundPosition: 0
+  backgroundPosition: 0,
+  isSoundActive: true
 }
 
 const characterDefaultData = {
@@ -103,12 +106,30 @@ const indicatorsDefaultData = {
 const fruitTypesArr = Object.keys(Food);
 const indicatorsTypesArr = Object.keys(indicatorsDefaultData);
 
+const backgroundAudio = new Audio();
+backgroundAudio.src = './assets/sound/background.mp3';
+
+const clickAudio = new Audio();
+clickAudio.src = './assets/sound/click.mp3';
+
+const countAudio = new Audio();
+countAudio.src = './assets/sound/count.mp3';
+
+const finishAudio = new Audio();
+finishAudio.src = './assets/sound/finish.mp3';
+
 let characterData = {};
 let fruitsData = [];
 let stonesData = [];
 let indicatorsData = {};
 
+document.addEventListener('click', onDocumentClick);
+
 // Обработчики событий
+function onDocumentClick() {
+  clickAudio.play();
+}
+
 function onStartButtonClick() {
   screenStart.classList.add('hidden');
   screenGame.classList.remove('hidden');
@@ -116,10 +137,25 @@ function onStartButtonClick() {
   initGame();
 }
 
+function onSoundTogglerClick() {
+  toggleSoundActivity();
+}
+
+function onSoundTogglerKeyDown(evt) {
+  if (evt.key === 'Space') {
+    toggleSoundActivity();
+  }
+}
+
 // Функции
 function initGame() {
   settings.isStarted = true;
   settings.startTime = Date.now();
+
+  soundToggler.addEventListener('click', onSoundTogglerClick);
+  document.addEventListener('keydown', onSoundTogglerKeyDown);
+
+  backgroundAudio.play();
 
   requestAnimationFrame(moveBackground);
   
@@ -141,12 +177,22 @@ function renderAllObjects() {
   renderIndicators();
 }
 
+function toggleSoundActivity() {
+  settings.isSoundActive = !settings.isSoundActive;
+  soundToggler.classList.toggle('inactive');
+
+  backgroundAudio.volume = settings.isSoundActive ? 1 : 0;
+  clickAudio.volume = settings.isSoundActive ? 1 : 0;
+  countAudio.volume = settings.isSoundActive ? 1 : 0;
+  finishAudio.volume = settings.isSoundActive ? 1 : 0;
+}
+
 function moveBackground() {
   if (settings.isStarted && characterData.isMoving) {
     if (characterData.directions.forward) {
-      settings.backgroundPosition += settings.speed;
+      settings.backgroundPosition += BACKGROUND_SPEED;
     } else if (characterData.directions.back) {
-      settings.backgroundPosition += settings.speed;
+      settings.backgroundPosition += BACKGROUND_SPEED;
     }    
   }
 
@@ -320,6 +366,7 @@ function renderFruit(fruitData, index) {
     if (isMeetingWithCharacter(fruitData)) {
       fruitData.posY = playground.clientHeight;
       indicatorsData.fruits.value++;
+      countAudio.play();
     }
   }
 }
