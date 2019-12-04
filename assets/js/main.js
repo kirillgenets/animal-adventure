@@ -13,7 +13,8 @@ const screenStart = document.querySelector('.screen-start'),
   playground = screenGame.querySelector('.playground'),
   startButton = screenStart.querySelector('.start-button'),
   defaultIndicators = screenGame.querySelectorAll('.panel-score'),
-  soundToggler = screenGame.querySelector('.sound-toggler');
+  soundToggler = screenGame.querySelector('.sound-toggler'),
+  pauseToggler = screenGame.querySelector('.pause-toggler');
 
 startButton.addEventListener('click', onStartButtonClick);
 
@@ -141,10 +142,14 @@ function onSoundTogglerClick() {
   toggleSoundActivity();
 }
 
-function onSoundTogglerKeyDown(evt) {
-  if (evt.key === 'Space') {
-    toggleSoundActivity();
+function onPauseKeyDown(evt) {
+  if (evt.code === 'Space') {
+    pauseGame();
   }
+}
+
+function onPauseTogglerClick() {
+  pauseGame();
 }
 
 // Функции
@@ -153,7 +158,8 @@ function initGame() {
   settings.startTime = Date.now();
 
   soundToggler.addEventListener('click', onSoundTogglerClick);
-  document.addEventListener('keydown', onSoundTogglerKeyDown);
+  pauseToggler.addEventListener('click', onPauseTogglerClick);
+  document.addEventListener('keydown', onPauseKeyDown);
 
   backgroundAudio.play();
 
@@ -185,6 +191,19 @@ function toggleSoundActivity() {
   clickAudio.volume = settings.isSoundActive ? 1 : 0;
   countAudio.volume = settings.isSoundActive ? 1 : 0;
   finishAudio.volume = settings.isSoundActive ? 1 : 0;
+}
+
+function pauseGame() {
+  pauseToggler.classList.toggle('inactive');
+
+  settings.pauseTime = settings.pauseTime ? settings.pauseTime : Date.now();
+  settings.isStarted = !settings.isStarted;
+
+  if (settings.isStarted) {
+    backgroundAudio.play();
+  } else {
+    backgroundAudio.pause();
+  }
 }
 
 function moveBackground() {
@@ -463,6 +482,11 @@ function renderIndicators() {
 
     function changeTimerValue() {
       if (settings.isStarted) {
+        if (settings.pauseTime) {
+          settings.startTime += Date.now() - settings.pauseTime;
+          settings.pauseTime = '';
+        }
+
         indicatorData.value = '';
         const currentTime = (Date.now() - settings.startTime) / 1000;
         const minutes = Math.floor(currentTime / 60);
