@@ -1,23 +1,26 @@
 'use strict';
 
 const MAX_FRUITS_COUNT_X = 5,
-  MAX_STONES_COUNT_X = 3,
+  MAX_STONES_COUNT_X = 5,
   MAX_FRUITS_DISTANCE_Y = 150,
   MAX_STONES_DISTANCE_Y = 200,
   FRUITS_COUNT_Y = 7,
-  STONES_COUNT_Y = 4;
+  STONES_COUNT_Y = 5;
 
 const screenStart = document.querySelector('.screen-start'),
   screenGame = document.querySelector('.screen-game'),
   playground = screenGame.querySelector('.playground'),
-  startButton = screenStart.querySelector('.start-button');
+  startButton = screenStart.querySelector('.start-button'),
+  defaultIndicators = screenGame.querySelectorAll('.panel-score');
 
 startButton.addEventListener('click', onStartButtonClick);
 
 // Данные
 const settings = {
   isStarted: false,
-  speed: 1
+  speed: 1,
+  startTime: '',
+  pauseTime: ''
 }
 
 const characterDefaultData = {
@@ -28,7 +31,7 @@ const characterDefaultData = {
   backgroundPosX: 0,
   backgroundPosY: -147.75,
   posX: 487,
-  posY: 10,
+  posY: 720,
   speed: 1.5,
   className: 'character',
   directions: {
@@ -83,11 +86,26 @@ const stonesDefaultData = {
   posY: 0
 }
 
+const indicatorsDefaultData = {
+  fruits: {
+    type: 'fruits',
+    description: 'Очки',
+    value: 0
+  },
+  timer: {
+    type: 'timer',
+    description: 'Время',
+    value: '00:00'
+  }
+}
+
 const fruitTypesArr = Object.keys(Food);
+const indicatorsTypesArr = Object.keys(indicatorsDefaultData);
 
 let characterData = {};
 let fruitsData = [];
 let stonesData = [];
+let indicatorsData = {};
 
 // Обработчики событий
 function onStartButtonClick() {
@@ -100,6 +118,7 @@ function onStartButtonClick() {
 // Функции
 function initGame() {
   settings.isStarted = true;
+  settings.startTime = Date.now();
   
   createAllData();
   renderAllObjects();
@@ -109,12 +128,14 @@ function createAllData() {
   createCharacterData();
   createFruitsData();
   createStonesData();
+  createIndicatorsData();
 }
 
 function renderAllObjects() {
   renderCharacter();
   renderAllFruits();
   renderAllStones();
+  renderIndicators();
 }
 
 function createCharacterData() {
@@ -144,13 +165,13 @@ function renderCharacter() {
   function changeCharacterPosition() {
     if (characterData.isMoving) {
       if (characterData.directions.back) {
-        characterData.posY -= characterData.speed;
+        characterData.posY += characterData.speed;
       } else if (characterData.directions.left) {
         characterData.posX -= characterData.speed;
       } else if (characterData.directions.right) {
         characterData.posX += characterData.speed;
       } else {
-        characterData.posY += characterData.speed;
+        characterData.posY -= characterData.speed;
       }
 
       if (characterData.posX < 0) {
@@ -222,13 +243,21 @@ function renderCharacter() {
   }
 }
 
+function isMeetingWithCharacter(objectData) {
+  return (characterData.posX <= objectData.posX + objectData.width && 
+          characterData.posX + characterData.width >= objectData.posX &&
+          characterData.posY <= objectData.posY + objectData.height &&
+          characterData.posY + characterData.height >= objectData.posY);
+}
+
+
 function createFruitsData() {
   let y = 0;
 
   for (let i = 0; i < FRUITS_COUNT_Y; i++) {
     for (let j = 0; j < getRandomObjectsCount(MAX_FRUITS_COUNT_X); j++) {
       const randomFruitData = Object.assign({}, Food[getRandomFruitType()]);
-      randomFruitData.posX = getRandomObjectPosition();
+      randomFruitData.posX = getRandomObjectPosition(randomFruitData.width);
       randomFruitData.posY = y;
   
       fruitsData.push(randomFruitData);
@@ -242,16 +271,17 @@ function renderAllFruits() {
   fruitsData.forEach(renderFruit);
 }
 
-function renderFruit(fruitData) {
+function renderFruit(fruitData, index) {
   let fruitInstance = new GameObject(fruitData);
   playground.append(fruitInstance.render());
 
   requestAnimationFrame(moveFruit);
 
   function moveFruit() {
-    if (settings.isStarted && fruitInstance) {
+    if (settings.isStarted) {
       changeFruitPosition();
-      loopFruits();     
+      checkFruitForMeeting();
+      loopFruit();     
     }
 
     requestAnimationFrame(moveFruit);    
@@ -259,13 +289,20 @@ function renderFruit(fruitData) {
 
   function changeFruitPosition() {
     fruitData.posY += settings.speed;
-    fruitInstance.fall(fruitData.posY);
+    fruitInstance.fall(fruitData.posX, fruitData.posY);
   }
 
-  function loopFruits() {
+  function loopFruit() {
     if (fruitData.posY > playground.clientHeight) {
       fruitData.posY = -fruitData.height;
-      fruitData.posX = getRandomObjectPosition();
+      fruitData.posX = getRandomObjectPosition(fruitData.width);
+    }
+  }
+
+  function checkFruitForMeeting() {
+    if (isMeetingWithCharacter(fruitData)) {
+      fruitData.posY = playground.clientHeight;
+      indicatorsData.fruits.value++;
     }
   }
 }
@@ -279,11 +316,11 @@ function createStonesData() {
 
   for (let i = 0; i < STONES_COUNT_Y; i++) {
     for (let j = 0; j < getRandomObjectsCount(MAX_STONES_COUNT_X); j++) {
-      const randomStoneData = Object.assign({}, stonesDefaultData);
-      randomStoneData.posX = getRandomObjectPosition();
-      randomStoneData.posY = y;
+      const stoneData = Object.assign({}, stonesDefaultData);
+      stoneData.posX = getRandomObjectPosition(stoneData.width);
+      stoneData.posY = y;
   
-      stonesData.push(randomStoneData);
+      stonesData.push(stoneData);
     }
 
     y -= MAX_STONES_DISTANCE_Y;
@@ -303,7 +340,7 @@ function renderStone(stoneData) {
   function moveStone() {
     if (settings.isStarted && stoneInstance) {
       changeStonePosition();
-      loopStones();     
+      loopStone();     
     }
 
     requestAnimationFrame(moveStone);    
@@ -311,13 +348,13 @@ function renderStone(stoneData) {
 
   function changeStonePosition() {
     stoneData.posY += settings.speed;
-    stoneInstance.fall(stoneData.posY);
+    stoneInstance.fall(stoneData.posX, stoneData.posY);
   }
 
-  function loopStones() {
+  function loopStone() {
     if (stoneData.posY > playground.clientHeight) {
       stoneData.posY = -stoneData.height;
-      stoneData.posX = getRandomObjectPosition();
+      stoneData.posX = getRandomObjectPosition(stoneData.width);
     }
   }
 }
@@ -326,8 +363,61 @@ function getRandomObjectsCount(maxCount) {
   return Math.floor(Math.random() * maxCount);
 }
 
-function getRandomObjectPosition() {
-  return Math.random() * playground.clientWidth;
+function getRandomObjectPosition(width) {
+  const edge = playground.clientWidth - width; 
+  return Math.random() * edge;
+}
+
+function createIndicatorsData() {
+  indicatorsData = Object.assign({}, indicatorsDefaultData);
+}
+
+function renderIndicators() {
+  clearOldIndicators();
+
+  indicatorsTypesArr.forEach(type => {
+    const indicatorData = indicatorsData[type];
+    const indicatorInstance = new Indicator(indicatorData);
+
+    screenGame.append(indicatorInstance.render());
+
+    if (type === 'fruits') {
+      requestAnimationFrame(changeFruitsValue);
+    }
+
+    if (type === 'timer') {
+      requestAnimationFrame(changeTimerValue);
+    }
+
+    function changeFruitsValue() {
+      if (settings.isStarted) {
+        indicatorInstance.change(indicatorData.value);
+      }
+
+      requestAnimationFrame(changeFruitsValue);
+    }
+
+    function changeTimerValue() {
+      if (settings.isStarted) {
+        indicatorData.value = '';
+        const currentTime = (Date.now() - settings.startTime) / 1000;
+        const minutes = Math.floor(currentTime / 60);
+        const seconds = Math.floor(currentTime % 60);
+
+        indicatorData.value += minutes > 9 ? minutes : `0${minutes}`;
+        indicatorData.value += ':';
+        indicatorData.value += seconds > 9 ? seconds : `0${seconds}`;
+
+        indicatorInstance.change(indicatorData.value);
+      }
+
+      requestAnimationFrame(changeTimerValue);
+    }
+  });
+}
+
+function clearOldIndicators() {
+  defaultIndicators.forEach(indicator => indicator.remove());
 }
 
 function createElement(template) {
@@ -394,7 +484,7 @@ class Character {
 
   move(newPosX, newPosY) {
     this._element.style.left = `${newPosX}px`;
-    this._element.style.bottom = `${newPosY}px`;
+    this._element.style.top = `${newPosY}px`;
     this._changeDirection();
 
     requestAnimationFrame(this._animate);
@@ -426,11 +516,45 @@ class GameObject {
   }
 
   unrender() {
+    if (this._element) {
+      this._element.remove();
+      this._element = null;
+    }     
+  }
+
+  fall(newPosX, newPosY) {
+    if (this._element) {
+      this._element.style.left = `${newPosX}px`;
+      this._element.style.top = `${newPosY}px`;
+    }    
+  }
+}
+
+class Indicator {
+  constructor(props) {
+    this._type = props.type;
+    this._description = props.description;
+    this._value = props.value;
+  }
+
+  get template() {
+    return `<div class="panel-score panel-${this._type}">
+              <p class="panel-score-description">${this._description}:</p>
+              <p class="panel-score-value ${this._type}-value">${this._value}</p>
+            </div>`;
+  }
+
+  render() {
+    return this._element = createElement(this.template);
+  }
+
+  unrender() {
     this._element.remove();
     this._element = null;
   }
 
-  fall(newPosY) {
-    this._element.style.top = `${newPosY}px`;
+  change(value) {
+    this._value = value;
+    this._element.querySelector('.panel-score-value').textContent = this._value;
   }
 }
