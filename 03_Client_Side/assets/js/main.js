@@ -329,42 +329,23 @@ function renderCharacter() {
   function onCharacterKeyDown(evt) {
     switch (evt.key) {
       case 'ArrowUp':
-        clearDirections();
-        characterData.directions.forward = true;
-        characterData.isMoving = true;
+        changeCharacterDirection('forward');
         break;
       case 'ArrowDown':
-        clearDirections();
-        characterData.directions.back = true;
-        characterData.isMoving = true;
+        changeCharacterDirection('back');
         break;
       case 'ArrowLeft':
-        clearDirections();
-        characterData.directions.left = true;
-        characterData.isMoving = true;
+        changeCharacterDirection('left');
         break;
       case 'ArrowRight':
-        clearDirections();
-        characterData.directions.right = true;
-        characterData.isMoving = true;
+        changeCharacterDirection('right');
         break;
     }
   }
 
   function onCharacterKeyUp(evt) {
-    switch (evt.key) {
-      case 'ArrowUp':
-        characterData.isMoving = false;
-        break;
-      case 'ArrowDown':
-        characterData.isMoving = false;
-        break;
-      case 'ArrowLeft':
-        characterData.isMoving = false;
-        break;
-      case 'ArrowRight':
-        characterData.isMoving = false;
-        break;
+    if (evt.key === 'ArrowUp' || evt.key === 'ArrowDown' || evt.key === 'ArrowLeft' || evt.key === 'ArrowRight') {
+      characterData.isMoving = false;
     }
   }
 
@@ -372,6 +353,12 @@ function renderCharacter() {
     for (let key in characterData.directions) {
       characterData.directions[key] = false;
     }
+  }
+
+  function changeCharacterDirection(direction) {
+    clearDirections();
+    characterData.directions[direction] = true;
+    characterData.isMoving = true;
   }
 }
 
@@ -556,9 +543,7 @@ function renderIndicators() {
         const minutes = Math.floor(currentTime / 60);
         const seconds = Math.floor(currentTime % 60);
 
-        indicatorData.value += minutes > 9 ? minutes : `0${minutes}`;
-        indicatorData.value += ':';
-        indicatorData.value += seconds > 9 ? seconds : `0${seconds}`;
+        indicatorData.value = `${minutes > 9 ? minutes : `0${minutes}`}:${seconds > 9 ? seconds : `0${seconds}`}`;
 
         indicatorInstance.change(indicatorData.value);
       }
@@ -601,15 +586,10 @@ class Character {
   }
 
   _changeDirection() {
-    if (this._directions.back) {
-      this._backgroundPosY = 0;
-    } else if (this._directions.left) {
-      this._backgroundPosY = -this._height;
-    } else if (this._directions.right) {
-      this._backgroundPosY = -this._height * 2;
-    } else {
-      this._backgroundPosY = -this._height * 3;
-    }
+    this._backgroundPosY = this._directions.back ? 0 : this._backgroundPosY;
+    this._backgroundPosY = this._directions.forward ? -this._height * 3 : this._backgroundPosY;
+    this._backgroundPosY = this._directions.left ? -this._height : this._backgroundPosY;
+    this._backgroundPosY = this._directions.right ? -this._height * 2 : this._backgroundPosY;
 
     this._element.style.backgroundPosition = `${this._backgroundPosX}px ${this._backgroundPosY}px`;
   }
