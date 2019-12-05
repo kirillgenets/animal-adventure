@@ -112,17 +112,12 @@ const indicatorsDefaultData = {
 const fruitTypesArr = Object.keys(Food);
 const indicatorsTypesArr = Object.keys(indicatorsDefaultData);
 
-const backgroundAudio = new Audio();
-backgroundAudio.src = './assets/sound/background.mp3';
-
-const clickAudio = new Audio();
-clickAudio.src = './assets/sound/click.mp3';
-
-const countAudio = new Audio();
-countAudio.src = './assets/sound/count.mp3';
-
-const finishAudio = new Audio();
-finishAudio.src = './assets/sound/finish.mp3';
+const sounds = {
+  backgroundAudio: new Audio('./assets/sound/background.mp3'),
+  clickAudio: new Audio('./assets/sound/click.mp3'),
+  countAudio: new Audio('./assets/sound/count.mp3'),
+  finishAudio: new Audio('./assets/sound/finish.mp3')
+}
 
 let characterData = {};
 let fruitsData = [];
@@ -138,7 +133,7 @@ rulesList.style.animation = 'show 2s';
 
 // Обработчики событий
 function onDocumentClick() {
-  clickAudio.play();
+  sounds.clickAudio.play();
 }
 
 function onStartButtonClick() {
@@ -176,10 +171,12 @@ function initGame() {
 
   pauseToggler.addEventListener('click', onPauseTogglerClick);
   document.addEventListener('keydown', onPauseKeyDown);
+
   startButton.removeEventListener('click', onStartButtonClick);
   playAgainButton.removeEventListener('click', onPlayAgainButtonClick);
 
-  backgroundAudio.play();
+  sounds.backgroundAudio.loop = true;
+  sounds.backgroundAudio.play();
 
   requestAnimationFrame(moveBackground);
 
@@ -198,23 +195,24 @@ function clearAllData() {
 }
 
 function clearAllObjects() {
-  [...document.querySelectorAll('.object')].forEach(object => { object.remove(); });
+  document.querySelectorAll('.object').forEach(object => { object.remove(); });
 }
 
 function overGame() {
   settings.isStarted = false;
   settings.isOver = true;
 
-  stopAudio(backgroundAudio);
-  stopAudio(countAudio);
+  stopAudio(sounds.backgroundAudio);
+  stopAudio(sounds.countAudio);
 
-  finishAudio.play();
+  sounds.finishAudio.play();
 
   gameOverPanel.classList.remove('hidden');
   
   showResults();
 
   playAgainButton.addEventListener('click', onPlayAgainButtonClick);
+
   pauseToggler.removeEventListener('click', onPauseTogglerClick);
   document.removeEventListener('keydown', onPauseKeyDown);
 }
@@ -242,10 +240,9 @@ function toggleSoundActivity() {
   settings.isSoundActive = !settings.isSoundActive;
   soundToggler.classList.toggle('inactive');
 
-  backgroundAudio.volume = settings.isSoundActive ? 1 : 0;
-  clickAudio.volume = settings.isSoundActive ? 1 : 0;
-  countAudio.volume = settings.isSoundActive ? 1 : 0;
-  finishAudio.volume = settings.isSoundActive ? 1 : 0;
+  for (const key in sounds) {
+    sounds[key].volume = settings.isSoundActive ? 1 : 0;
+  }  
 }
 
 function stopAudio(audio) {
@@ -256,23 +253,20 @@ function stopAudio(audio) {
 function pauseGame() {
   pauseToggler.classList.toggle('inactive');
 
-  settings.pauseTime = settings.pauseTime ? settings.pauseTime : Date.now();
+  settings.pauseTime = settings.pauseTime || Date.now();
   settings.isStarted = !settings.isStarted;
 
   if (settings.isStarted) {
-    backgroundAudio.play();
+    sounds.backgroundAudio.play();
   } else {
-    backgroundAudio.pause();
+    sounds.backgroundAudio.pause();
   }
 }
 
 function moveBackground() {
   if (settings.isStarted && characterData.isMoving) {
-    if (characterData.directions.forward) {
-      settings.backgroundPosition += BACKGROUND_SPEED;
-    } else if (characterData.directions.back) {
-      settings.backgroundPosition -= BACKGROUND_SPEED;
-    }    
+    settings.backgroundPosition += characterData.directions.forward ? BACKGROUND_SPEED : 0;
+    settings.backgroundPosition -= characterData.directions.back ? BACKGROUND_SPEED : 0;   
   }
 
   screenGame.style.backgroundPosition = `0 ${settings.backgroundPosition}px`;
@@ -314,31 +308,19 @@ function renderCharacter() {
 
   function changeCharacterPosition() {
     if (characterData.isMoving) {
-      if (characterData.directions.back) {
-        characterData.posY += characterData.speed;
-      } else if (characterData.directions.left) {
-        characterData.posX -= characterData.speed;
-      } else if (characterData.directions.right) {
-        characterData.posX += characterData.speed;
-      } else {
-        characterData.posY -= characterData.speed;
-      }
+      characterData.posY += characterData.directions.back ? characterData.speed : 0;
+      characterData.posY -= characterData.directions.forward ? characterData.speed : 0;
+      characterData.posX -= characterData.directions.left ? characterData.speed : 0;
+      characterData.posX += characterData.directions.right ? characterData.speed : 0;
 
-      if (characterData.posX < 0) {
-        characterData.posX = 0;
-      }
+      characterData.posX = characterData.posX < 0 ? 0 : characterData.posX;
+      characterData.posY = characterData.posY < 0 ? 0 : characterData.posY;
 
-      if (characterData.posX > playground.clientWidth - characterData.width) {
-        characterData.posX = playground.clientWidth - characterData.width;
-      }
+      characterData.posX = characterData.posX > playground.clientWidth - characterData.width ? 
+        playground.clientWidth - characterData.width : characterData.posX;
 
-      if (characterData.posY < 0) {
-        characterData.posY = 0;
-      }
-
-      if (characterData.posY > playground.clientHeight - characterData.height) {
-        characterData.posY = playground.clientHeight - characterData.height;
-      }
+      characterData.posY = characterData.posY > playground.clientHeight - characterData.height ? 
+        playground.clientHeight - characterData.height : characterData.posY;
 
       characterInstance.move(characterData.posX, characterData.posY);
     }
@@ -455,7 +437,7 @@ function renderFruit(fruitData, index) {
     if (isMeetingWithCharacter(fruitData)) {
       fruitData.posY = playground.clientHeight;
       indicatorsData.fruits.value++;
-      countAudio.play();
+      sounds.countAudio.play();
     }
   }
 }
